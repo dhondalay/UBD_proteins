@@ -8,13 +8,13 @@
 
 ##########################################################################################
 #
-# Description : 
-#               
-# Usage : 
-# 
-# Input : 
+# Description :
 #
-# Output : 
+# Usage :
+#
+# Input :
+#
+# Output :
 #
 ##########################################################################################
 
@@ -27,6 +27,7 @@ use Cwd;
 use Path::Class::Rule;
 use File::Basename;
 use Getopt::Long;
+
 
 my $dashes = '= ' x 60 . "\n";
 my $pwd1;
@@ -65,16 +66,16 @@ mkdir $extract_folder unless -d $extract_folder; # Check if dir exists. If not c
 chdir $extract_folder;
 
 foreach my $id (split /\n/ ,$content) {
-    
+
     my $pwd1 = cwd();
-    
+
     # Creates folder specific for each InterPro ID.
     my $dir = './' . $id;
     mkdir $dir unless -d $dir; # Check if dir exists. If not create it.
     chdir $dir;
-    
+
     print "Fetching information for : ", $id, "\n";
-    
+
     # Fetching IDs...
     my $file_id = $id. "." . "txt";
     my $url_ids = 'http://www.ebi.ac.uk/interpro/entry/' . $id . '/proteins-matched?species=9606&export=ids';
@@ -88,7 +89,7 @@ foreach my $id (split /\n/ ,$content) {
     # open (MYFILE_FASTA, ">$file_fasta");
     # print MYFILE_FASTA get $url_fasta;
     # close (MYFILE_FATSA);
- 
+
     chdir $pwd1;
 }
 
@@ -126,27 +127,27 @@ my $rule = Path::Class::Rule->new; # match anything
 $rule->file->name('IPR*.txt');
 
 my $next = $rule->iter( my @dirs );
-  
+
 open ( OUTPUT1, '>', $output1 ) or die "Could not open output file: $!";
 
 while ( my $file = $next->() ) {
-    
+
     my $ids_counts = 0;
-    
+
     print "Reading file : $file\n";
 
     open (my $fh, '<:encoding(UTF-8)', $file) or die "Could not open file : '$file' $!";
-    
+
     while (my $row = <$fh>) {
         # chomp $row;
         print $row, "\n";
         $ids_counts ++;
         print OUTPUT1 $row;
     }
-    
+
     print "* * * * * * * * * = $ids_counts\n\n";
     close $fh;
-       
+
 }
 close OUTPUT1;
 
@@ -160,13 +161,13 @@ print "\nChecking for duplicate IDs . . . . . ";
 my %a = ();
 
 open(OUTPUT1, '<', $output1) or die "can't open : $!";
-    
+
     open (OUTPUT2, '>', $output2) or die "Cant open: $!";
         while (<OUTPUT1>) {
             print OUTPUT2 unless $a{$_}++;
         }
     close OUTPUT2;
-    
+
 close OUTPUT1;
 
 print "Done\n";
@@ -229,9 +230,9 @@ print "Completed copying files . . . . .\n";
 
 # Store only .txt-files in the @files array using glob
 chdir $ipr_dir. "/multifastas";
-    
+
 my $multi_fasta = 'perl ~/OneDrive/scripts/perl/InterPro_multifasta_generation.pl';
-print `$multi_fasta`;    
+print `$multi_fasta`;
 
 print "Completed writing multifasta file";
 
@@ -247,21 +248,21 @@ system("cp \'$ipr_dir/multifastas/'*.fasta \'$ipr_dir/extracts/'");
 my @fasta_files = grep ( -f ,<*.fasta>);
 
 foreach my $fasta_file (@fasta_files) {
-	
+
 	my $pwd = cwd();
-    
+
     # Creates folder specific for each InterPro ID.
     my ($name, $path, $suffix) = fileparse($fasta_file,("\.fasta"));
     mkdir $name unless -d $name; # Check if dir exists. If not create it.
     chdir $name;
-    
-	system("cp \'$pwd/$fasta_file\' \'$pwd/$name/'"); 
-    
+
+	system("cp \'$pwd/$fasta_file\' \'$pwd/$name/'");
+
     my $email = 'dhondalay_krishna@yahoo.com';
     my $iprscan = 'perl ~/OneDrive/scripts/perl/iprscan.pl';
-    
+
     print `$iprscan $fasta_file --multifasta --email $email`;
-    
+
     chdir $pwd;
 
 	print "$fasta_file\n";
